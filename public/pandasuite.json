@@ -4,95 +4,209 @@
   
     "system": {
       "localization": false,
-      "actions": [
-        {
-          "id": "toMarker",
-          "name": "Change Image",
-          "locale_name": {
-            "fr_FR": "Change Image"
-          },
-          "params": [
-            { "id": "useless", "name": "Useless", "locale_name": {"fr_FR": "Inutile"}, "type": "Boolean" }
-          ]
-        }
-      ],
-      "events": [
-        {
-          "id": "triggerMarker",
-          "name": "Image",
-          "locale_name": {
-            "fr_FR": "Image"
-          }
-        }
-      ],
-      "markers": [
-        {
-          "params": [
-            { "id": "src", "name": "Source", "locale_name": {"fr_FR": "Source"}, "type": "String" }
-          ]
-        }
-      ]
+      "markers": false
     },
 
     "properties": [
       {
-        "id": "searchTerm",
-        "name": "Search Term",
+        "id": "url",
+        "name": "URL",
         "locale_name": {
-          "fr_FR": "Terme de recherche"
+          "fr_FR": "URL"
         },
         "type": "String",
-        "value": "panda"
+        "bindable": true
+      },
+      {
+        "id": "method",
+        "name": "Method",
+        "locale_name": {
+          "fr_FR": "Method"
+        },
+        "type": "Dropdown",
+        "value": "POST",
+        "items": [
+          {
+            "id": "GET",
+            "name": "GET"
+          },
+          {
+            "id": "POST",
+            "name": "POST"
+          },
+          {
+            "id": "HEAD",
+            "name": "HEAD"
+          },
+          {
+            "id": "PUT",
+            "name": "PUT"
+          },
+          {
+            "id": "PATCH",
+            "name": "PATCH"
+          },
+          {
+            "id": "DEL",
+            "name": "DELETE"
+          }
+        ],
+        "bindable": true
+      },
+      {
+        "id": "cache",
+        "type": "Dropdown",
+        "value": "none",
+        "items": [
+          {
+            "id": "none",
+            "name": "No caching",
+            "locale_name": {
+              "fr_FR": "Aucun cache"
+            }    
+          },
+          {
+            "id": "memory",
+            "name": "Temporary cache",
+            "locale_name": {
+              "fr_FR": "Cache temporaire"
+            }    
+          },
+          {
+            "id": "persistent",
+            "name": "Persistent cache",
+            "locale_name": {
+              "fr_FR": "Cache persistant"
+            }    
+          }
+        ],
+        "separator": true
+      },
+      {
+        "id": "contentType",
+        "name": "Content Type",
+        "locale_name": {
+          "fr_FR": "Type de contenu"
+        },
+        "type": "Dropdown",
+        "value": "application/json",
+        "items": [
+          {
+            "id": "text/plain",
+            "name": "Text (text/plain)"
+          },
+          {
+            "id": "application/json",
+            "name": "JSON (application/json)"
+          },
+          {
+            "id": "application/xml",
+            "name": "XML (application/xml)"
+          },
+          {
+            "id": "text/xml",
+            "name": "XML (text/xml)"
+          },
+          {
+            "id": "text/html",
+            "name": "HTML (text/html)"
+          }
+        ],
+        "separator": true,
+        "bindable": true
+      },
+      {
+        "id": "content",
+        "name": "Content",
+        "locale_name": {
+          "fr_FR": "Contenu"
+        },
+        "type": "Code",
+        "language": "json",
+        "options": {
+          "minimap": {
+            "enabled": false
+          }
+        },
+        "bindable": true
+      },
+      {
+        "id": "headers",
+        "name": "Headers",
+        "locale_name": {
+          "fr_FR": "En-têtes"
+        },
+        "type": "Hash",
+        "separator": true
+      },
+      {
+        "id": "query",
+        "name": "Query String",
+        "locale_name": {
+          "fr_FR": "Chaîne d'interrogation"
+        },
+        "type": "Hash",
+        "separator": true
+      },
+      {
+        "id": "user",
+        "name": "User Name",
+        "locale_name": {
+          "fr_FR": "Nom d'utilisateur"
+        },
+        "type": "String",
+        "bindable": true,
+        "separator": true
+      },
+      {
+        "id": "password",
+        "name": "Password",
+        "locale_name": {
+          "fr_FR": "Mot de passe"
+        },
+        "type": "String",
+        "bindable": true
       }
     ],
   
     "events": [
       {
-        "id": "imageChanged",
-        "name": "Image Changed",
+        "id": "requestCompleted",
+        "name": "Request completed",
         "locale_name": {
-          "fr_FR": "Image Changée"
+          "fr_FR": "Requête complétée"
+        }
+      },
+      {
+        "id": "requestFailed",
+        "name": "Request failed",
+        "locale_name": {
+          "fr_FR": "Requête rejetée"
         }
       }
     ],
   
     "actions": [
       {
-        "id": "changeColor",
-        "name": "Change Color",
-        "params": [
-          {
-            "id": "backgroundColor",
-            "name": "Background Color",
-            "locale_name": {
-              "fr_FR": "Couleur de fond"
-            },
-            "type": "String",
-            "value": "#FFFFFF"
-          }
-        ]
-      }
-    ],
-
-    "synchronization": [
-      {
-        "id": "synchroImages",
-        "name": "Synchronize images",
+        "id": "start",
+        "name": "Start request",
         "locale_name": {
-          "fr_FR": "Synchroniser images"
+          "fr_FR": "Lancer la requête"
         }
-      }
-    ],
-  
-    "resources": [
+      },
       {
-        "id": "my_image.png",
-        "name": "Example image",
+        "id": "clearCache",
+        "name": "Clear cache",
         "locale_name": {
-          "fr_FR": "Image exemple"
-        },
-        "type": "Image",
-        "localization": false
+          "fr_FR": "Supprimer le cache"
+        }
+      },
+      {
+        "id": "redoRequests",
+        "name": "Redo rejected requests",
+        "locale_name": {
+          "fr_FR": "Refaire les requêtes rejetées"
+        }
       }
     ]
 }
