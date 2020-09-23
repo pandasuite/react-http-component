@@ -43,7 +43,7 @@ export default class PandaFetch {
     this.responsesStore = localForage.createInstance({
       name: 'responsesStore',
       // eslint-disable-next-line no-underscore-dangle
-      driver: properties.cache === 'persistent' ? localForage.INDEXEDDB : sessionStorageDriver._driver,
+      driver: properties.persistent ? localForage.INDEXEDDB : sessionStorageDriver._driver,
       storeName: this.uniqueId,
     });
   }
@@ -81,29 +81,38 @@ export default class PandaFetch {
       PandaBridge.send('requestFailed');
     };
 
+    const fetchRequest = () => {
+      return fetch(this.url, merge(this.options, {
+        retryOn: (attempt, error, response) => attempt < 3 && response && response.status >= 500,
+        retryDelay: (attempt) => (2 ** attempt) * 1000,
+      }))
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.text();
+            if (this.properties.cache !== 'none') {
+              this.responsesStore.setItem(this.getStorageKey(), data);
+            }
+            sendCompletedEvent(data);
+          } else {
+            sendFailedEvent();
+          }
+        });
+    };
+
     this.getCachedResponse()
-      .then((data) => {
-        sendCompletedEvent(data);
+      .then((cachedData) => {
+        if (this.properties.cache === 'cacheFirst') {
+          sendCompletedEvent(cachedData);
+        } else {
+          fetchRequest().catch(() => {
+            sendCompletedEvent(cachedData);
+          });
+        }
       })
       .catch(() => {
-        fetch(this.url, merge(this.options, {
-          retryOn: (attempt, error, response) => attempt < 3 && response && response.status >= 500,
-          retryDelay: (attempt) => (2 ** attempt) * 1000,
-        }))
-          .then(async (response) => {
-            if (response.ok) {
-              const data = await response.text();
-              if (this.properties.cache !== 'none') {
-                this.responsesStore.setItem(this.getStorageKey(), data);
-              }
-              sendCompletedEvent(data);
-            } else {
-              sendFailedEvent();
-            }
-          })
-          .catch(() => {
-            this.addFailedRequest();
-          });
+        fetchRequest().catch(() => {
+          this.addFailedRequest();
+        });
       });
   }
 

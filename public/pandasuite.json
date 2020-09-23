@@ -24,7 +24,7 @@
           "fr_FR": "Method"
         },
         "type": "Dropdown",
-        "value": "POST",
+        "value": "GET",
         "items": [
           {
             "id": "GET",
@@ -60,27 +60,36 @@
         "items": [
           {
             "id": "none",
-            "name": "No caching",
+            "name": "No cache",
             "locale_name": {
               "fr_FR": "Aucun cache"
             }    
           },
           {
-            "id": "memory",
-            "name": "Temporary cache",
+            "id": "cacheFirst",
+            "name": "Cache first",
             "locale_name": {
-              "fr_FR": "Cache temporaire"
+              "fr_FR": "Cache en premier"
             }    
           },
           {
-            "id": "persistent",
-            "name": "Persistent cache",
+            "id": "networkAndCache",
+            "name": "Network and cache",
             "locale_name": {
-              "fr_FR": "Cache persistant"
+              "fr_FR": "Réseau et cache"
             }    
           }
         ],
         "separator": true
+      },
+      {
+        "id": "persistent",
+        "name": "Persistent cache",
+        "locale_name": {
+          "fr_FR": "Cache persistant"
+        },
+        "type": "Boolean",
+        "value": false
       },
       {
         "id": "contentType",
