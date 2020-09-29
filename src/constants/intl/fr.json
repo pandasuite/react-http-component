@@ -1,0 +1,12 @@
+{
+  "request.button.title": "Test Requête",
+  "prev.button.title": "Précédente Requête",
+  "next.button.title": "Prochaine Requête",
+  "result.description": "Cliquez directement sur les valeurs des champs pour les exposer",
+  "key.type.string": "Chaîne de caractères",
+  "key.type.boolean": "Booléen",
+  "key.type.number": "Nombre",
+  "key.type.image": "Image",
+  "key.type.offset": "Pagination offset",
+  "key.type.offset.pointer": "Fusionner les résultats"
+}

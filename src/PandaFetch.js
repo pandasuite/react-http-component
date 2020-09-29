@@ -1,15 +1,26 @@
+/* eslint-disable no-underscore-dangle */
 import PandaBridge from 'pandasuite-bridge';
 import localForage from 'localforage';
 import * as sessionStorageDriver from 'localforage-driver-session-storage';
-import { merge } from 'lodash';
-import { parse } from './utils/json';
+
+import merge from 'lodash/merge';
+import assign from 'lodash/assign';
 
 const originalFetch = require('isomorphic-fetch');
 const fetch = require('fetch-retry')(originalFetch);
 
 export default class PandaFetch {
-  constructor(properties) {
-    this.properties = properties;
+  constructor(properties, callback) {
+    if (properties) {
+      this.properties = properties;
+    }
+    if (callback) {
+      this.callback = callback;
+    }
+  }
+
+  set properties(properties) {
+    this._properties = properties;
     this.uniqueId = (properties || {})[PandaBridge.UNIQUE_ID];
 
     const method = properties.method.toLowerCase();
@@ -29,10 +40,6 @@ export default class PandaFetch {
     }
     this.options = options;
 
-    const url = new URL(this.properties.url);
-    const queryString = new URLSearchParams(this.properties.query || {}).toString();
-    this.url = `${url.origin}${url.pathname}?${queryString}`;
-
     this.requestsStore = localForage.createInstance({
       name: 'requestsStore',
       storeName: this.uniqueId,
@@ -48,8 +55,28 @@ export default class PandaFetch {
     });
   }
 
+  get properties() {
+    return this._properties;
+  }
+
+  set callback(callback) {
+    this._callback = callback;
+  }
+
+  get callback() {
+    return this._callback;
+  }
+
+  getUrl() {
+    const url = new URL(this.properties.url);
+    const queryString = new URLSearchParams(
+      assign({}, this.properties.query || {}, this.customQuery || {}),
+    ).toString();
+    return `${url.origin}${url.pathname}?${queryString}`;
+  }
+
   getStorageKey() {
-    return `${this.url}${JSON.stringify(this.options)}`;
+    return `${this.getUrl()}${JSON.stringify(this.options)}`;
   }
 
   getCachedResponse() {
@@ -71,33 +98,32 @@ export default class PandaFetch {
 
   doRequest() {
     const sendCompletedEvent = (data) => {
-      PandaBridge.send('requestCompleted', [{ data: parse(data) }]);
-      PandaBridge.send(PandaBridge.UPDATED, {
-        queryable: parse(data),
-      });
+      if (this.callback) {
+        this.callback(data);
+      }
     };
 
-    const sendFailedEvent = () => {
-      PandaBridge.send('requestFailed');
+    const sendFailedEvent = (error) => {
+      if (this.callback) {
+        this.callback(null, error);
+      }
     };
 
-    const fetchRequest = () => {
-      return fetch(this.url, merge(this.options, {
-        retryOn: (attempt, error, response) => attempt < 3 && response && response.status >= 500,
-        retryDelay: (attempt) => (2 ** attempt) * 1000,
-      }))
-        .then(async (response) => {
-          if (response.ok) {
-            const data = await response.text();
-            if (this.properties.cache !== 'none') {
-              this.responsesStore.setItem(this.getStorageKey(), data);
-            }
-            sendCompletedEvent(data);
-          } else {
-            sendFailedEvent();
+    const fetchRequest = () => fetch(this.getUrl(), merge(this.options, {
+      retryOn: (attempt, error, response) => attempt < 3 && response && response.status >= 500,
+      retryDelay: (attempt) => (2 ** attempt) * 1000,
+    }))
+      .then(async (response) => {
+        if (response.ok) {
+          const data = await response.text();
+          if (this.properties.cache !== 'none') {
+            this.responsesStore.setItem(this.getStorageKey(), data);
           }
-        });
-    };
+          sendCompletedEvent(data);
+        } else {
+          sendFailedEvent(response.error);
+        }
+      });
 
     this.getCachedResponse()
       .then((cachedData) => {
@@ -138,5 +164,13 @@ export default class PandaFetch {
 
   clearResponseCache() {
     this.responsesStore.clear();
+  }
+
+  setQueryParam(name, value) {
+    this.customQuery = merge(this.customQuery || {}, { [name]: value });
+  }
+
+  removeQueryParam(name) {
+    delete this.customQuery[name];
   }
 }

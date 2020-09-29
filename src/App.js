@@ -1,38 +1,22 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import './App.css';
 
 import { usePandaBridge } from 'pandasuite-bridge-react';
 import PandaBridge from 'pandasuite-bridge';
 
 import Fetch from './components/Fetch';
-import PandaFetch from './PandaFetch';
+import Setup from './components/Setup';
+import IntlProvider from './components/IntlProvider';
+import FetchHandler from './FetchHandler';
 
 function App() {
-  const fetchRef = useRef();
-
-  const { properties } = usePandaBridge({
+  const { properties, setProperty } = usePandaBridge({
     actions: {
-      start: () => {
-        if (fetchRef.current) {
-          fetchRef.current.doRequest();
-        } else {
-          new PandaFetch(PandaBridge.properties).doRequest();
-        }
-      },
-      clearCache: () => {
-        if (fetchRef.current) {
-          fetchRef.current.clearCache();
-        } else {
-          new PandaFetch(PandaBridge.properties).clearCache();
-        }
-      },
-      redoRequests: () => {
-        if (fetchRef.current) {
-          fetchRef.current.redoRequests();
-        } else {
-          new PandaFetch(PandaBridge.properties).redoRequests();
-        }
-      },
+      start: () => { FetchHandler.doRequest(PandaBridge.properties); },
+      clearCache: () => { FetchHandler.clearCache(PandaBridge.properties); },
+      redoRequests: () => { FetchHandler.redoRequests(PandaBridge.properties); },
+      nextPage: () => { FetchHandler.nextPage(); },
+      prevPage: () => { FetchHandler.prevPage(); },
     },
   });
 
@@ -41,12 +25,17 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Fetch
-        properties={properties}
-        ref={fetchRef}
-      />
-    </div>
+    <IntlProvider>
+      <div className="App">
+        <Fetch
+          properties={properties}
+        />
+        <Setup
+          properties={properties}
+          setProperty={setProperty}
+        />
+      </div>
+    </IntlProvider>
   );
 }
 

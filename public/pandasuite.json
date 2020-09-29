@@ -175,6 +175,10 @@
         },
         "type": "String",
         "bindable": true
+      },
+      {
+        "id": "keys",
+        "hidden": true
       }
     ],
   
@@ -215,6 +219,20 @@
         "name": "Redo rejected requests",
         "locale_name": {
           "fr_FR": "Refaire les requêtes rejetées"
+        }
+      },
+      {
+        "id": "nextPage",
+        "name": "Next page",
+        "locale_name": {
+          "fr_FR": "Page suivante"
+        }
+      },
+      {
+        "id": "prevPage",
+        "name": "Previous page",
+        "locale_name": {
+          "fr_FR": "Page précédente"
         }
       }
     ]

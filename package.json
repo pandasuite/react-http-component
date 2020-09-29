@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^7.1.2",
     "fetch-retry": "^4.0.1",
     "isomorphic-fetch": "^2.2.1",
+    "json-pointer": "^0.6.1",
     "localforage": "^1.9.0",
     "localforage-driver-session-storage": "^1.0.4",
     "lodash": "^4.17.19",
@@ -19,7 +20,11 @@
     "react": "^16.13.0",
     "react-app-polyfill": "^1.0.6",
     "react-dom": "^16.13.0",
-    "react-scripts": "3.4.0"
+    "react-icons": "^3.11.0",
+    "react-intl": "^5.8.2",
+    "react-json-view": "^1.19.1",
+    "react-scripts": "3.4.0",
+    "recoil": "^0.0.10"
   },
   "scripts": {
     "start": "react-scripts start",

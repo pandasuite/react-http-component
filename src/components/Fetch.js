@@ -1,47 +1,33 @@
-import {
-  useImperativeHandle, forwardRef, useEffect, useRef,
-} from 'react';
+import { useEffect } from 'react';
 
 import useOnlineStatus from '@rehooks/online-status';
-import usePrevious from '../hooks/usePrevious';
-import PandaFetch from '../PandaFetch';
+import { useSetRecoilState } from 'recoil';
 
-const Fetch = forwardRef((props, ref) => {
+import usePrevious from '../hooks/usePrevious';
+import FetchHandler from '../FetchHandler';
+import resultAtom from '../atoms/Result';
+
+function Fetch(props) {
   const { properties } = props;
 
-  const pandaFetchRef = useRef();
   const onlineStatus = useOnlineStatus();
   const prevStatus = usePrevious(onlineStatus);
+  const setResult = useSetRecoilState(resultAtom);
 
-  const doRequest = () => {
-    pandaFetchRef.current.doRequest();
-  };
-
-  const clearCache = () => {
-    pandaFetchRef.current.clearCache();
-  };
-
-  const redoRequests = () => {
-    pandaFetchRef.current.redoRequests();
-  };
-
-  useImperativeHandle(ref, () => ({
-    doRequest,
-    clearCache,
-    redoRequests,
-  }));
-
-  pandaFetchRef.current = new PandaFetch(properties);
+  FetchHandler.updateProperties(properties);
+  FetchHandler.setSuccessCallback((data) => {
+    setResult(data);
+  });
 
   if (prevStatus === false && onlineStatus === true) {
-    pandaFetchRef.current.redoRequests();
+    FetchHandler.redoRequests();
   }
 
   useEffect(() => {
-    pandaFetchRef.current.redoRequests();
+    FetchHandler.redoRequests();
   }, []);
 
   return null;
-});
+}
 
 export default Fetch;

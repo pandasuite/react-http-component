@@ -1,0 +1,12 @@
+{
+  "request.button.title": "Test Request",
+  "prev.button.title": "Previous Request",
+  "next.button.title": "Next Request",
+  "result.description": "Click directly on the field values to expose them",
+  "key.type.string": "String",
+  "key.type.boolean": "Boolean",
+  "key.type.number": "Number",
+  "key.type.image": "Image",
+  "key.type.offset": "Offset Pagination",
+  "key.type.offset.pointer": "Merge results"
+}
