@@ -8,5 +8,8 @@
   "key.type.number": "Nombre",
   "key.type.image": "Image",
   "key.type.offset": "Pagination offset",
-  "key.type.offset.pointer": "Fusionner les résultats"
+  "key.type.offset.pointer": "Fusionner les résultats",
+  "offline.list.button.title": "Lister les résultats",
+  "offline.button.title": "Récupérer les résultats pour les consulter hors connexion",
+  "offline.delete.button.title": "Supprimer les résultats hors ligne"
 }

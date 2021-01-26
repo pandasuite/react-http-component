@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 
 import { usePandaBridge } from 'pandasuite-bridge-react';
@@ -10,7 +10,9 @@ import IntlProvider from './components/IntlProvider';
 import FetchHandler from './FetchHandler';
 
 function App() {
-  const { properties, setProperty } = usePandaBridge({
+  const {
+    properties, resources, setProperty, setResources,
+  } = usePandaBridge({
     actions: {
       start: () => { FetchHandler.doRequest(PandaBridge.properties); },
       clearCache: () => { FetchHandler.clearCache(PandaBridge.properties); },
@@ -19,6 +21,10 @@ function App() {
       prevPage: () => { FetchHandler.prevPage(); },
     },
   });
+
+  useEffect(() => {
+    FetchHandler.updateResources(resources);
+  }, [resources]);
 
   if (properties === undefined) {
     return null;
@@ -32,7 +38,9 @@ function App() {
         />
         <Setup
           properties={properties}
+          resources={resources}
           setProperty={setProperty}
+          setResources={setResources}
         />
       </div>
     </IntlProvider>

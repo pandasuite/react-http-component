@@ -8,5 +8,8 @@
   "key.type.number": "Number",
   "key.type.image": "Image",
   "key.type.offset": "Offset Pagination",
-  "key.type.offset.pointer": "Merge results"
+  "key.type.offset.pointer": "Merge results",
+  "offline.list.button.title": "List the results",
+  "offline.button.title": "Retrieve results for offline viewing",
+  "offline.delete.button.title": "Delete offline results"
 }

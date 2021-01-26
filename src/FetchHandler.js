@@ -1,5 +1,8 @@
+import each from 'lodash/each';
 import find from 'lodash/find';
+import map from 'lodash/map';
 import last from 'lodash/last';
+import isEmpty from 'lodash/isEmpty';
 
 import PandaBridge from 'pandasuite-bridge';
 import PandaFetch from './PandaFetch';
@@ -7,11 +10,17 @@ import { parse } from './utils/json';
 
 const pointer = require('json-pointer');
 
+const originalFetch = require('isomorphic-fetch');
+const fetch = require('fetch-retry')(originalFetch);
+
 const pagination = {
   offsets: [],
   index: 0,
   pointerData: [],
 };
+
+let updateResourcesInProgress = false;
+let waitingQueue = [];
 
 class FetchHandler {
   constructor() {
@@ -20,6 +29,32 @@ class FetchHandler {
 
   updateProperties(properties) {
     this.pandaFetch.properties = properties;
+  }
+
+  updateResources(resources) {
+    if (isEmpty(resources)) {
+      return;
+    }
+
+    const { responsesStore } = this.pandaFetch;
+
+    updateResourcesInProgress = true;
+    Promise.all(
+      map(resources, async (resource) => {
+        if (resource.local && resource.data && resource.data.sk) {
+          const response = await fetch(resource.path);
+          const data = await response.text();
+          return responsesStore.setItem(resource.data.sk, data);
+        }
+        return null;
+      }),
+    ).then(() => {
+      updateResourcesInProgress = false;
+      each(waitingQueue, ([callBack, callBackArgs]) => {
+        callBack.apply(this, callBackArgs);
+      });
+      waitingQueue = [];
+    });
   }
 
   getKeyOffset() {
@@ -44,10 +79,12 @@ class FetchHandler {
     return existingPage;
   }
 
-  setSuccessCallback(callback) {
+  setSuccessCallback(callback, withPandaBridge = true) {
     this.pandaFetch.callback = (data, error) => {
       if (error) {
-        PandaBridge.send('requestFailed');
+        if (withPandaBridge) {
+          PandaBridge.send('requestFailed');
+        }
         return false;
       }
 
@@ -71,10 +108,12 @@ class FetchHandler {
         }
       }
 
-      PandaBridge.send('requestCompleted', [{ data: schema }]);
-      PandaBridge.send(PandaBridge.UPDATED, {
-        queryable: schema,
-      });
+      if (withPandaBridge) {
+        PandaBridge.send('requestCompleted', [{ data: schema }]);
+        PandaBridge.send(PandaBridge.UPDATED, {
+          queryable: schema,
+        });
+      }
 
       if (callback) {
         callback(responseData);
@@ -84,11 +123,16 @@ class FetchHandler {
   }
 
   doRequest(properties) {
+    if (updateResourcesInProgress) {
+      waitingQueue.push([this.doRequest, [properties]]);
+      return false;
+    }
     if (properties) {
       this.updateProperties(properties);
     }
     this.resetPagination();
     this.pandaFetch.doRequest();
+    return true;
   }
 
   resetPagination() {
@@ -98,18 +142,33 @@ class FetchHandler {
     this.pandaFetch.customQuery = {};
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  getPaginationIndex() {
+    return pagination.index;
+  }
+
   clearCache(properties) {
+    if (updateResourcesInProgress) {
+      waitingQueue.push([this.clearCache, [properties]]);
+      return false;
+    }
     if (properties) {
       this.updateProperties(properties);
     }
     this.pandaFetch.clearCache();
+    return true;
   }
 
   redoRequests(properties) {
+    if (updateResourcesInProgress) {
+      waitingQueue.push([this.redoRequests, [properties]]);
+      return false;
+    }
     if (properties) {
       this.updateProperties(properties);
     }
     this.pandaFetch.redoRequests();
+    return true;
   }
 
   nextPage(properties) {
@@ -130,9 +189,13 @@ class FetchHandler {
         this.pandaFetch.removeQueryParam(name);
         if (offsetValue !== null) { // last page
           this.pandaFetch.doRequest();
+        } else {
+          return false;
         }
       }
+      return true;
     }
+    return false;
   }
 
   prevPage(properties) {
@@ -159,13 +222,19 @@ class FetchHandler {
         this.pandaFetch.removeQueryParam(name);
         if (executeRequest) {
           this.pandaFetch.doRequest();
+        } else {
+          return false;
         }
       }
+      return true;
     }
+    return false;
   }
 }
 
 const singletonInstance = new FetchHandler();
 Object.freeze(singletonInstance);
+
+export const FetchHandlerConstructor = FetchHandler;
 
 export default singletonInstance;

@@ -19,9 +19,12 @@ import { FaTrashAlt } from 'react-icons/fa';
 import resultAtom from '../atoms/Result';
 import { parse } from '../utils/json';
 import FetchHandler from '../FetchHandler';
+import Persitence from './Persitence';
 
 function Setup(props) {
-  const { properties, setProperty } = props;
+  const {
+    properties, resources, setProperty, setResources,
+  } = props;
   const { keys: oriKeys } = properties;
   const keys = oriKeys || [];
 
@@ -104,7 +107,7 @@ function Setup(props) {
                 <option value="string" selected={key.type === 'string'}>{intl.formatMessage({ id: 'key.type.string' })}</option>
                 <option value="boolean" selected={key.type === 'boolean'}>{intl.formatMessage({ id: 'key.type.boolean' })}</option>
                 <option value="number" selected={key.type === 'number'}>{intl.formatMessage({ id: 'key.type.number' })}</option>
-                <option value="number" selected={key.type === 'image'}>{intl.formatMessage({ id: 'key.type.image' })}</option>
+                <option value="image" selected={key.type === 'image'}>{intl.formatMessage({ id: 'key.type.image' })}</option>
                 <option value="offset" selected={key.type === 'offset'}>{intl.formatMessage({ id: 'key.type.offset' })}</option>
               </select>
               {key.type === 'offset'
@@ -147,17 +150,25 @@ function Setup(props) {
             />
           </>
         )}
+      <Persitence
+        properties={properties}
+        resources={resources}
+        setResources={setResources}
+      />
     </>
   );
 }
 
 Setup.defaultProps = {
   setProperty: () => null,
+  setResources: () => null,
 };
 
 Setup.propTypes = {
   properties: PropTypes.oneOfType([PropTypes.object]).isRequired,
+  resources: PropTypes.oneOfType([PropTypes.object]).isRequired,
   setProperty: PropTypes.func,
+  setResources: PropTypes.func,
 };
 
 export default Setup;
