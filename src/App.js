@@ -14,7 +14,13 @@ function App() {
     properties, resources, setProperty, setResources,
   } = usePandaBridge({
     actions: {
-      start: () => { FetchHandler.doRequest(PandaBridge.properties); },
+      start: ({ loop }) => {
+        if (loop) {
+          FetchHandler.doRequests(PandaBridge.properties);
+        } else {
+          FetchHandler.doRequest(PandaBridge.properties);
+        }
+      },
       clearCache: () => { FetchHandler.clearCache(PandaBridge.properties); },
       redoRequests: () => { FetchHandler.redoRequests(PandaBridge.properties); },
       nextPage: () => { FetchHandler.nextPage(); },

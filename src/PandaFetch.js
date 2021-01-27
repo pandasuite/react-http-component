@@ -10,12 +10,9 @@ const originalFetch = require('isomorphic-fetch');
 const fetch = require('fetch-retry')(originalFetch);
 
 export default class PandaFetch {
-  constructor(properties, callback) {
+  constructor(properties) {
     if (properties) {
       this.properties = properties;
-    }
-    if (callback) {
-      this.callback = callback;
     }
   }
 
@@ -59,14 +56,6 @@ export default class PandaFetch {
     return this._properties;
   }
 
-  set callback(callback) {
-    this._callback = callback;
-  }
-
-  get callback() {
-    return this._callback;
-  }
-
   getUrl() {
     const url = new URL(this.properties.url);
     const queryString = new URLSearchParams(
@@ -97,49 +86,39 @@ export default class PandaFetch {
   }
 
   doRequest() {
-    const sendCompletedEvent = (data) => {
-      if (this.callback) {
-        this.callback(data);
-      }
-    };
-
-    const sendFailedEvent = (error) => {
-      if (this.callback) {
-        this.callback(null, error);
-      }
-    };
-
-    const fetchRequest = () => fetch(this.getUrl(), merge(this.options, {
-      retryOn: (attempt, error, response) => attempt < 3 && response && response.status >= 500,
-      retryDelay: (attempt) => (2 ** attempt) * 1000,
-    }))
-      .then(async (response) => {
-        if (response.ok) {
-          const data = await response.text();
-          if (this.properties.cache !== 'none') {
-            this.responsesStore.setItem(this.getStorageKey(), data);
+    return new Promise((resolve, reject) => {
+      const fetchRequest = () => fetch(this.getUrl(), merge(this.options, {
+        retryOn: (attempt, error, response) => attempt < 3 && response && response.status >= 500,
+        retryDelay: (attempt) => (2 ** attempt) * 1000,
+      }))
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.text();
+            if (this.properties.cache !== 'none') {
+              this.responsesStore.setItem(this.getStorageKey(), data);
+            }
+            resolve(data);
+          } else {
+            reject(response.error);
           }
-          sendCompletedEvent(data);
-        } else {
-          sendFailedEvent(response.error);
-        }
-      });
-
-    this.getCachedResponse()
-      .then((cachedData) => {
-        if (this.properties.cache === 'cacheFirst') {
-          sendCompletedEvent(cachedData);
-        } else {
-          fetchRequest().catch(() => {
-            sendCompletedEvent(cachedData);
-          });
-        }
-      })
-      .catch(() => {
-        fetchRequest().catch(() => {
-          this.addFailedRequest();
         });
-      });
+
+      this.getCachedResponse()
+        .then((cachedData) => {
+          if (this.properties.cache === 'cacheFirst') {
+            resolve(cachedData);
+          } else {
+            fetchRequest().catch(() => {
+              resolve(cachedData);
+            });
+          }
+        })
+        .catch(() => {
+          fetchRequest().catch(() => {
+            this.addFailedRequest();
+          });
+        });
+    });
   }
 
   async addFailedRequest() {
@@ -163,7 +142,7 @@ export default class PandaFetch {
   }
 
   clearResponseCache() {
-    this.responsesStore.clear();
+    return this.responsesStore.clear();
   }
 
   setQueryParam(name, value) {

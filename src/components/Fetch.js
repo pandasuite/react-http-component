@@ -15,9 +15,9 @@ function Fetch(props) {
   const setResult = useSetRecoilState(resultAtom);
 
   FetchHandler.updateProperties(properties);
-  FetchHandler.setSuccessCallback((data) => {
+  FetchHandler.callback = (data) => {
     setResult(data);
-  });
+  };
 
   if (prevStatus === false && onlineStatus === true) {
     FetchHandler.redoRequests();

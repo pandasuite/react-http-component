@@ -205,7 +205,18 @@
         "name": "Start request",
         "locale_name": {
           "fr_FR": "Lancer la requête"
-        }
+        },
+        "params": [
+          {
+            "id": "loop",
+            "name": "Loop on all pages",
+            "locale_name": {
+              "fr_FR": "Boucle sur toutes les pages"
+            },
+            "type": "Boolean",
+            "value": false
+          }
+        ]
       },
       {
         "id": "clearCache",

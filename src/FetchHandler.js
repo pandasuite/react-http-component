@@ -1,4 +1,3 @@
-import each from 'lodash/each';
 import find from 'lodash/find';
 import map from 'lodash/map';
 import last from 'lodash/last';
@@ -13,18 +12,21 @@ const pointer = require('json-pointer');
 const originalFetch = require('isomorphic-fetch');
 const fetch = require('fetch-retry')(originalFetch);
 
-const pagination = {
-  offsets: [],
-  index: 0,
-  pointerData: [],
-};
-
-let updateResourcesInProgress = false;
-let waitingQueue = [];
-
 class FetchHandler {
+  _callback = null;
+  _pagination = {
+    offsets: [],
+    index: 0,
+    pointerData: [],
+  };
+  initPromise = Promise.resolve();
+
   constructor() {
     this.pandaFetch = new PandaFetch();
+  }
+
+  set callback(callback) {
+    this._callback = callback;
   }
 
   updateProperties(properties) {
@@ -35,25 +37,25 @@ class FetchHandler {
     if (isEmpty(resources)) {
       return;
     }
+    this.initCacheFromResources(resources);
+  }
 
-    const { responsesStore } = this.pandaFetch;
+  initCacheFromResources(resources) {
+    this.initPromise = new Promise((resolve) => {
+      const { responsesStore } = this.pandaFetch;
 
-    updateResourcesInProgress = true;
-    Promise.all(
-      map(resources, async (resource) => {
-        if (resource.local && resource.data && resource.data.sk) {
-          const response = await fetch(resource.path);
-          const data = await response.text();
-          return responsesStore.setItem(resource.data.sk, data);
-        }
-        return null;
-      }),
-    ).then(() => {
-      updateResourcesInProgress = false;
-      each(waitingQueue, ([callBack, callBackArgs]) => {
-        callBack.apply(this, callBackArgs);
+      Promise.all(
+        map(resources, async (resource) => {
+          if (resource.local && resource.data && resource.data.sk) {
+            const response = await fetch(resource.path);
+            const data = await response.text();
+            return responsesStore.setItem(resource.data.sk, data);
+          }
+          return null;
+        }),
+      ).then(() => {
+        resolve();
       });
-      waitingQueue = [];
     });
   }
 
@@ -70,24 +72,17 @@ class FetchHandler {
       value = pointer.get(schema, pointer.compile(offset.name));
     } catch (e) {}
 
-    const existingPage = pagination.offsets[pagination.index];
+    const existingPage = this._pagination.offsets[this._pagination.index];
     if (existingPage) {
-      pagination.offsets[pagination.index] = value;
+      this._pagination.offsets[this._pagination.index] = value;
     } else {
-      pagination.offsets.push(value);
+      this._pagination.offsets.push(value);
     }
     return existingPage;
   }
 
-  setSuccessCallback(callback, withPandaBridge = true) {
-    this.pandaFetch.callback = (data, error) => {
-      if (error) {
-        if (withPandaBridge) {
-          PandaBridge.send('requestFailed');
-        }
-        return false;
-      }
-
+  constructResponse(data) {
+    return new Promise((resolve, reject) => {
       let responseData = data;
 
       const schema = parse(data) || {};
@@ -100,78 +95,114 @@ class FetchHandler {
           try {
             if (!offsetExists) {
               const newData = pointer.get(schema, keyOffset.pointer);
-              pagination.pointerData = pagination.pointerData.concat(newData);
+              this._pagination.pointerData = this._pagination.pointerData.concat(newData);
             }
-            pointer.set(schema, keyOffset.pointer, pagination.pointerData);
+            pointer.set(schema, keyOffset.pointer, this._pagination.pointerData);
             responseData = JSON.stringify(schema);
-          } catch (e) {}
+          } catch (e) {
+            reject(e);
+          }
         }
       }
-
-      if (withPandaBridge) {
-        PandaBridge.send('requestCompleted', [{ data: schema }]);
-        PandaBridge.send(PandaBridge.UPDATED, {
-          queryable: schema,
-        });
-      }
-
-      if (callback) {
-        callback(responseData);
-      }
-      return true;
-    };
+      resolve([responseData, schema]);
+    });
   }
 
-  doRequest(properties) {
-    if (updateResourcesInProgress) {
-      waitingQueue.push([this.doRequest, [properties]]);
-      return false;
+  // eslint-disable-next-line class-methods-use-this
+  sendPandaEvents([data, schema]) {
+    return new Promise((resolve) => {
+      PandaBridge.send('requestCompleted', [{ data: schema }]);
+      PandaBridge.send(PandaBridge.UPDATED, {
+        queryable: schema,
+      });
+      resolve([data, schema]);
+    });
+  }
+
+  notify([data, schema]) {
+    return new Promise((resolve) => {
+      if (this._callback) {
+        this._callback(data);
+      }
+      resolve([data, schema]);
+    });
+  }
+
+  processResponse(promise, withoutEvents = false) {
+    let returnPromise = promise;
+
+    returnPromise = returnPromise
+      .then(this.constructResponse.bind(this));
+    if (!withoutEvents) {
+      returnPromise = returnPromise
+        .then(this.sendPandaEvents.bind(this));
     }
+    returnPromise = returnPromise
+      .then(this.notify.bind(this));
+
+    if (!withoutEvents) {
+      return returnPromise.catch(() => {
+        PandaBridge.send('requestFailed');
+      });
+    } else {
+      return returnPromise;
+    }
+  }
+
+  doRequest(properties, withoutEvents = false) {
     if (properties) {
       this.updateProperties(properties);
     }
     this.resetPagination();
-    this.pandaFetch.doRequest();
-    return true;
+    return this.initPromise.then(() => {
+      return this.processResponse(this.pandaFetch.doRequest(), withoutEvents);
+    });
+  }
+
+  doRequests(properties) {
+    return this.initPromise.then(async () => {
+      let [data, schema] = await this.doRequest(properties, true);
+      let nextPageResult;
+
+      while ((nextPageResult = await this.nextPage(properties, true))) {
+        [data, schema] = nextPageResult;
+      }
+      return this.sendPandaEvents([data, schema]);
+    });
   }
 
   resetPagination() {
-    pagination.offsets = [];
-    pagination.index = 0;
-    pagination.pointerData = [];
+    this._pagination.offsets = [];
+    this._pagination.index = 0;
+    this._pagination.pointerData = [];
     this.pandaFetch.customQuery = {};
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getPaginationIndex() {
-    return pagination.index;
+    return this._pagination.index;
   }
 
   clearCache(properties) {
-    if (updateResourcesInProgress) {
-      waitingQueue.push([this.clearCache, [properties]]);
-      return false;
-    }
     if (properties) {
       this.updateProperties(properties);
     }
-    this.pandaFetch.clearCache();
-    return true;
+    return this.initPromise.then(() => {
+      return this.pandaFetch.clearResponseCache();
+    });
   }
 
   redoRequests(properties) {
-    if (updateResourcesInProgress) {
-      waitingQueue.push([this.redoRequests, [properties]]);
-      return false;
-    }
     if (properties) {
       this.updateProperties(properties);
     }
-    this.pandaFetch.redoRequests();
-    return true;
+    return this.initPromise.then(() => {
+      return this.pandaFetch.redoRequests();
+    });
   }
 
-  nextPage(properties) {
+  nextPage(properties, withoutEvents = false) {
+    let promise = Promise.resolve();
+
     if (properties) {
       this.updateProperties(properties);
     }
@@ -179,61 +210,56 @@ class FetchHandler {
 
     if (keyOffset) {
       const name = last(keyOffset.name);
-      const offsetValue = pagination.offsets[pagination.index];
+      const offsetValue = this._pagination.offsets[this._pagination.index];
 
       if (offsetValue) {
         this.pandaFetch.setQueryParam(name, offsetValue);
-        this.pandaFetch.doRequest();
-        pagination.index += 1;
+        promise = this.processResponse(this.pandaFetch.doRequest(), withoutEvents);
+        this._pagination.index += 1;
       } else {
         this.pandaFetch.removeQueryParam(name);
         if (offsetValue !== null) { // last page
-          this.pandaFetch.doRequest();
-        } else {
-          return false;
+          promise = this.processResponse(this.pandaFetch.doRequest(), withoutEvents);
         }
       }
-      return true;
     }
-    return false;
+    return promise;
   }
 
-  prevPage(properties) {
+  prevPage(properties, withoutEvents = false) {
+    let promise = Promise.resolve();
+
     if (properties) {
       this.updateProperties(properties);
     }
     const keyOffset = this.getKeyOffset();
 
     if (keyOffset) {
-      if (pagination.offsets[pagination.index] === null) { // Last page
-        pagination.index -= 1;
+      if (this._pagination.offsets[this._pagination.index] === null) { // Last page
+        this._pagination.index -= 1;
       }
 
       const name = last(keyOffset.name);
-      const offsetValue = pagination.offsets[pagination.index - 1];
+      const offsetValue = this._pagination.offsets[this._pagination.index - 1];
 
       if (offsetValue) {
         this.pandaFetch.setQueryParam(name, offsetValue);
-        this.pandaFetch.doRequest();
-        pagination.index -= 1;
+        promise = this.processResponse(this.pandaFetch.doRequest(), withoutEvents);
+        this._pagination.index -= 1;
       } else {
         const executeRequest = this.pandaFetch.customQuery[name] !== undefined;
 
         this.pandaFetch.removeQueryParam(name);
         if (executeRequest) {
-          this.pandaFetch.doRequest();
-        } else {
-          return false;
+          promise = this.processResponse(this.pandaFetch.doRequest(), withoutEvents);
         }
       }
-      return true;
     }
-    return false;
+    return promise;
   }
 }
 
 const singletonInstance = new FetchHandler();
-Object.freeze(singletonInstance);
 
 export const FetchHandlerConstructor = FetchHandler;
 
