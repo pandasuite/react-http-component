@@ -8135,11 +8135,6 @@ pandasuite-bridge-react@^2.0.6:
     react ">=16.8.0"
     recoil "^0.0.10"
 
-pandasuite-bridge@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/pandasuite-bridge/-/pandasuite-bridge-4.2.2.tgz#2a909e763cc1ed2859dd133d72c203f7f0a7ae50"
-  integrity sha512-7gNe+TetMvbsmzmVcFQvtWBBBNcZv+L8bGRfXkJvkNqeaN/1lz7Mkkesd066yrTBdnovsmaB7MWoZhF+VXOfNg==
-
 pandasuite-bridge@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/pandasuite-bridge/-/pandasuite-bridge-4.2.3.tgz#73b27bc8339a150d243e5749053ca4b0b0b72142"

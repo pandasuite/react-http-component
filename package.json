@@ -14,7 +14,7 @@
     "localforage": "^1.9.0",
     "localforage-driver-session-storage": "^1.0.4",
     "lodash": "^4.17.19",
-    "pandasuite-bridge": "^4.2.2",
+    "pandasuite-bridge": "^4.2.3",
     "pandasuite-bridge-react": "^2.0.6",
     "prop-types": "^15.7.2",
     "react": "^16.13.0",

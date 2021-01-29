@@ -6,11 +6,9 @@ import isEmpty from 'lodash/isEmpty';
 import PandaBridge from 'pandasuite-bridge';
 import PandaFetch from './PandaFetch';
 import { parse } from './utils/json';
+import { fetchLocal } from './utils/localFetch';
 
 const pointer = require('json-pointer');
-
-const originalFetch = require('isomorphic-fetch');
-const fetch = require('fetch-retry')(originalFetch);
 
 class FetchHandler {
   _callback = null;
@@ -47,8 +45,26 @@ class FetchHandler {
       Promise.all(
         map(resources, async (resource) => {
           if (resource.local && resource.data && resource.data.sk) {
-            const response = await fetch(resource.path);
-            const data = await response.text();
+            const response = await fetchLocal(resource.path);
+            let data = await response.text();
+
+            try {
+              const existingValue = await responsesStore.getItem(resource.data.sk);
+              if (existingValue) {
+                return null;
+              }
+            } catch (err) {
+            }
+
+            /* New remote request create new offset
+              We override it for the next cached requests
+            */
+            if (resource.data.offset) {
+              const schema = parse(data) || {};
+              const keyOffset = this.getKeyOffset();
+              pointer.set(schema, pointer.compile(keyOffset.name), resource.data.offset);
+              data = JSON.stringify(schema);
+            }
             return responsesStore.setItem(resource.data.sk, data);
           }
           return null;
@@ -64,7 +80,7 @@ class FetchHandler {
     return find(keys || [], (k) => k.type === 'offset');
   }
 
-  saveOffset(schema, keyOffset) {
+  getKeyOffsetValue(schema, keyOffset) {
     const offset = keyOffset || this.getKeyOffset();
     let value = null;
 
@@ -72,7 +88,13 @@ class FetchHandler {
       value = pointer.get(schema, pointer.compile(offset.name));
     } catch (e) {}
 
+    return value;
+  }
+
+  saveOffset(schema, keyOffset) {
+    const value = this.getKeyOffsetValue(schema, keyOffset);
     const existingPage = this._pagination.offsets[this._pagination.index];
+
     if (existingPage) {
       this._pagination.offsets[this._pagination.index] = value;
     } else {

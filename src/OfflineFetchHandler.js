@@ -52,9 +52,10 @@ export default class OfflineFetchHandler {
           data: {
             name: `request${paginationIndex}`,
             sk: this.fetchHandler.pandaFetch.getStorageKey(),
+            offset: this.fetchHandler.getKeyOffsetValue(schema),
           },
         });
-  
+
         const dict = pointer.dict(schema);
   
         each(this.properties.keys, (key) => {
