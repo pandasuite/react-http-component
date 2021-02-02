@@ -9,7 +9,7 @@
   "key.type.image": "Image",
   "key.type.offset": "Offset Pagination",
   "key.type.offset.pointer": "Merge results",
-  "offline.list.button.title": "List the results",
-  "offline.button.title": "Retrieve results for offline viewing",
-  "offline.delete.button.title": "Delete offline results"
+  "offline.list.button.title": "List results to download (offline)",
+  "offline.button.title": "Download (may take some time)",
+  "offline.delete.button.title": "Delete the download"
 }

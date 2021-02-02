@@ -150,11 +150,13 @@ function Setup(props) {
             />
           </>
         )}
+      {(Object.keys(resources).length > 0 || isObject(jsonResult)) && (
       <Persitence
         properties={properties}
         resources={resources}
         setResources={setResources}
       />
+      )}
     </>
   );
 }
