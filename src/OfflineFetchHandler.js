@@ -59,14 +59,14 @@ export default class OfflineFetchHandler {
         const dict = pointer.dict(schema);
   
         each(this.properties.keys, (key) => {
-          if (key.type === 'image') {
+          if (['image', 'audio', 'video'].indexOf(key.type) !== -1) {
             const regex = new RegExp(`/${key.name.join('/([0-9]+/)?')}`);
   
             each(dict, (v, k) => {
               if (k.match(regex)) {
                 this._requests.push({
                   id: v,
-                  type: 'Image',
+                  type: key.type.charAt(0).toUpperCase() + key.type.slice(1),
                   request: {
                     url: v,
                     method: 'GET',

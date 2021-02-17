@@ -108,6 +108,8 @@ function Setup(props) {
                 <option value="boolean" selected={key.type === 'boolean'}>{intl.formatMessage({ id: 'key.type.boolean' })}</option>
                 <option value="number" selected={key.type === 'number'}>{intl.formatMessage({ id: 'key.type.number' })}</option>
                 <option value="image" selected={key.type === 'image'}>{intl.formatMessage({ id: 'key.type.image' })}</option>
+                <option value="audio" selected={key.type === 'audio'}>{intl.formatMessage({ id: 'key.type.audio' })}</option>
+                <option value="video" selected={key.type === 'video'}>{intl.formatMessage({ id: 'key.type.video' })}</option>
                 <option value="offset" selected={key.type === 'offset'}>{intl.formatMessage({ id: 'key.type.offset' })}</option>
               </select>
               {key.type === 'offset'

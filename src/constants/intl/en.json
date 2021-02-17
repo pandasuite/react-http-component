@@ -7,6 +7,8 @@
   "key.type.boolean": "Boolean",
   "key.type.number": "Number",
   "key.type.image": "Image",
+  "key.type.audio": "Audio",
+  "key.type.video": "Video",
   "key.type.offset": "Offset Pagination",
   "key.type.offset.pointer": "Merge results",
   "offline.list.button.title": "List results to download (offline)",
