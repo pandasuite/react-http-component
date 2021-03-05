@@ -24,7 +24,7 @@ export default class PandaFetch {
     const requestHaveBody = ['get', 'head'].indexOf(method) === -1;
 
     const options = {
-      headers: merge(properties.headers, {
+      headers: merge({}, properties.headers, {
         'Content-Type': properties.contentType,
       }),
       method: properties.method,
@@ -87,7 +87,7 @@ export default class PandaFetch {
 
   doRequest() {
     return new Promise((resolve, reject) => {
-      const fetchRequest = () => fetch(this.getUrl(), merge(this.options, {
+      const fetchRequest = () => fetch(this.getUrl(), merge({}, this.options, {
         retryOn: (attempt, error, response) => attempt < 3 && response && response.status >= 500,
         retryDelay: (attempt) => (2 ** attempt) * 1000,
       }))
