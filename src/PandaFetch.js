@@ -38,17 +38,15 @@ export default class PandaFetch {
     this.options = options;
 
     this.requestsStore = localForage.createInstance({
-      name: 'requestsStore',
-      storeName: this.uniqueId,
+      name: 'requests_' + this.uniqueId,
     });
 
     localForage.defineDriver(sessionStorageDriver);
 
     this.responsesStore = localForage.createInstance({
-      name: 'responsesStore',
+      name: 'responses_' + this.uniqueId,
       // eslint-disable-next-line no-underscore-dangle
       driver: properties.persistent ? localForage.INDEXEDDB : sessionStorageDriver._driver,
-      storeName: this.uniqueId,
     });
   }
 
