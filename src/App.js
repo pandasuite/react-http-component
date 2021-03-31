@@ -4,6 +4,10 @@ import './App.css';
 import { usePandaBridge } from 'pandasuite-bridge-react';
 import PandaBridge from 'pandasuite-bridge';
 
+import isEmpty from 'lodash/isEmpty';
+import isString from 'lodash/isString';
+import assign from 'lodash/assign';
+
 import Fetch from './components/Fetch';
 import Setup from './components/Setup';
 import IntlProvider from './components/IntlProvider';
@@ -14,11 +18,17 @@ function App() {
     properties, resources, setProperty, setResources,
   } = usePandaBridge({
     actions: {
-      start: ({ loop }) => {
+      start: ({ loop, content }) => {
+        let properties = PandaBridge.properties;
+
+        if (!isEmpty(content)) {
+          const encodedContent = isString(content) ? content : JSON.stringify(content);
+          properties = assign({}, properties, { content: encodedContent });
+        }
         if (loop) {
-          FetchHandler.doRequests(PandaBridge.properties);
+          FetchHandler.doRequests(properties);
         } else {
-          FetchHandler.doRequest(PandaBridge.properties);
+          FetchHandler.doRequest(properties);
         }
       },
       clearCache: () => { FetchHandler.clearCache(PandaBridge.properties); },

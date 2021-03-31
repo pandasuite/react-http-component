@@ -215,6 +215,22 @@
             },
             "type": "Boolean",
             "value": false
+          },
+          {
+            "id": "content",
+            "name": "Content",
+            "locale_name": {
+              "fr_FR": "Contenu"
+            },
+            "type": "Code",
+            "language": "json",
+            "options": {
+              "minimap": {
+                "enabled": false
+              }
+            },
+            "bindable": true,
+            "hidden": true
           }
         ]
       },
