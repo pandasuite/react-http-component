@@ -5,6 +5,7 @@ import * as sessionStorageDriver from 'localforage-driver-session-storage';
 
 import merge from 'lodash/merge';
 import assign from 'lodash/assign';
+import { stringify } from './utils/json';
 
 const originalFetch = require('isomorphic-fetch');
 const fetch = require('fetch-retry')(originalFetch);
@@ -28,7 +29,7 @@ export default class PandaFetch {
         'Content-Type': properties.contentType,
       }),
       method: properties.method,
-      body: requestHaveBody ? properties.content : undefined,
+      body: requestHaveBody ? stringify(properties.content) : undefined,
       responseType: 'text',
     };
 
