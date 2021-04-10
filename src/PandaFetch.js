@@ -33,7 +33,7 @@ export default class PandaFetch {
       responseType: 'text',
     };
 
-    if (properties.user && properties.password) {
+    if (properties.basic && properties.user && properties.password) {
       options.headers.Authorization = `Basic ${btoa(`${properties.user}:${properties.password}`)}`;
     }
     this.options = options;

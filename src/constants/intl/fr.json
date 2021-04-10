@@ -1,8 +1,12 @@
 {
-  "request.button.title": "Test Requête",
+  "tab.configuration.title": "Configuration",
+  "tab.offline.title": "Hors connexion",
+  "request.button.title": "Tester la requête",
   "prev.button.title": "Précédente Requête",
   "next.button.title": "Prochaine Requête",
-  "result.description": "Cliquez directement sur les valeurs des champs pour les exposer",
+  "result.description": "Cliquez directement sur les valeurs des champs pour les exposer. C'est particulièrement utile pour mettre en place une pagination ou pour récupérer des médias hors ligne (mais pas obligatoire).",
+  "result.field.title": "Champ",
+  "result.type.title": "Type",
   "key.type.string": "Chaîne de caractères",
   "key.type.boolean": "Booléen",
   "key.type.number": "Nombre",
@@ -11,7 +15,10 @@
   "key.type.video": "Video",
   "key.type.offset": "Pagination offset",
   "key.type.offset.pointer": "Fusionner les résultats",
-  "offline.list.button.title": "Lister les résultats à télécharger (hors ligne)",
+  "offline.refresh.button.title": "Actualiser les résultats téléchargeables",
+  "offline.list.button.title": "Prévisualisation des résultats téléchargeables",
   "offline.button.title": "Télécharger (peut prendre du temps)",
-  "offline.delete.button.title": "Supprimer le téléchargement"
+  "offline.delta.button.title": "Télécharger les manques",
+  "offline.delete.button.title": "Vous avez {count} éléments téléchargés.",
+  "offline.delete.action.title": "Supprimer définitivement."
 }

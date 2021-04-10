@@ -11,6 +11,8 @@ const pointer = require('json-pointer');
 export default class OfflineFetchHandler {
   _requests = [];
 
+  static REQUEST_PREFIX = 'request';
+
   constructor(properties) {
     this.properties = properties;
 
@@ -50,7 +52,7 @@ export default class OfflineFetchHandler {
             force: true, // Force the request to be updated
           }, pick(this.fetchHandler.pandaFetch.options, ['method', 'headers', 'body'])),
           data: {
-            name: `request${paginationIndex}`,
+            name: `${OfflineFetchHandler.REQUEST_PREFIX}${paginationIndex}`,
             sk: this.fetchHandler.pandaFetch.getStorageKey(),
             offset: this.fetchHandler.getKeyOffsetValue(schema),
           },
@@ -72,7 +74,7 @@ export default class OfflineFetchHandler {
                     method: 'GET',
                   },
                   data: {
-                    name: `request${paginationIndex}${k}`,
+                    name: `${OfflineFetchHandler.REQUEST_PREFIX}${paginationIndex}${k}`,
                   },
                 });
               }

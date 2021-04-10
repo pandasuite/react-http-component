@@ -9,7 +9,7 @@ import isString from 'lodash/isString';
 import assign from 'lodash/assign';
 
 import Fetch from './components/Fetch';
-import Setup from './components/Setup';
+import Setup from './components/setup/Setup';
 import IntlProvider from './components/IntlProvider';
 import FetchHandler from './FetchHandler';
 
@@ -48,7 +48,7 @@ function App() {
 
   return (
     <IntlProvider>
-      <div className="App">
+      <div>
         <Fetch
           properties={properties}
         />

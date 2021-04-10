@@ -1,8 +1,12 @@
 {
+  "tab.configuration.title": "Configuration",
+  "tab.offline.title": "Offline",
   "request.button.title": "Test Request",
   "prev.button.title": "Previous Request",
   "next.button.title": "Next Request",
-  "result.description": "Click directly on the field values to expose them",
+  "result.description": "Click directly on the field values to expose them. This is particularly useful for setting up pagination or retrieving media offline (but not mandatory).",
+  "result.field.title": "Field",
+  "result.type.title": "Type",
   "key.type.string": "String",
   "key.type.boolean": "Boolean",
   "key.type.number": "Number",
@@ -11,7 +15,10 @@
   "key.type.video": "Video",
   "key.type.offset": "Offset Pagination",
   "key.type.offset.pointer": "Merge results",
-  "offline.list.button.title": "List results to download (offline)",
+  "offline.refresh.button.title": "Refresh downloadable results",
+  "offline.list.button.title": "Preview downloadable results",
   "offline.button.title": "Download (may take some time)",
-  "offline.delete.button.title": "Delete the download"
+  "offline.delta.button.title": "Download missing",
+  "offline.delete.button.title": "You have {count} downloaded items.",
+  "offline.delete.action.title": "Delete permanently."
 }

@@ -54,6 +54,56 @@
         "bindable": true
       },
       {
+        "id": "contentType",
+        "name": "Content Type",
+        "locale_name": {
+          "fr_FR": "Type de contenu"
+        },
+        "type": "Dropdown",
+        "value": "application/json",
+        "items": [
+          {
+            "id": "text/plain",
+            "name": "Text (text/plain)"
+          },
+          {
+            "id": "application/json",
+            "name": "JSON (application/json)"
+          },
+          {
+            "id": "application/xml",
+            "name": "XML (application/xml)"
+          },
+          {
+            "id": "text/xml",
+            "name": "XML (text/xml)"
+          },
+          {
+            "id": "text/html",
+            "name": "HTML (text/html)"
+          }
+        ],
+        "bindable": true,
+        "separator": true,
+        "hidden": "properties.method.value != 'POST' && properties.method.value != 'PUT' && properties.method.value != 'PATCH'"
+      },
+      {
+        "id": "content",
+        "name": "Content",
+        "locale_name": {
+          "fr_FR": "Contenu"
+        },
+        "type": "Code",
+        "language": "json",
+        "options": {
+          "minimap": {
+            "enabled": false
+          }
+        },
+        "bindable": true,
+        "hidden": "properties.method.value != 'POST' && properties.method.value != 'PUT' && properties.method.value != 'PATCH'"
+      },
+      {
         "id": "cache",
         "type": "Dropdown",
         "value": "none",
@@ -89,55 +139,8 @@
           "fr_FR": "Cache persistant"
         },
         "type": "Boolean",
-        "value": false
-      },
-      {
-        "id": "contentType",
-        "name": "Content Type",
-        "locale_name": {
-          "fr_FR": "Type de contenu"
-        },
-        "type": "Dropdown",
-        "value": "application/json",
-        "items": [
-          {
-            "id": "text/plain",
-            "name": "Text (text/plain)"
-          },
-          {
-            "id": "application/json",
-            "name": "JSON (application/json)"
-          },
-          {
-            "id": "application/xml",
-            "name": "XML (application/xml)"
-          },
-          {
-            "id": "text/xml",
-            "name": "XML (text/xml)"
-          },
-          {
-            "id": "text/html",
-            "name": "HTML (text/html)"
-          }
-        ],
-        "separator": true,
-        "bindable": true
-      },
-      {
-        "id": "content",
-        "name": "Content",
-        "locale_name": {
-          "fr_FR": "Contenu"
-        },
-        "type": "Code",
-        "language": "json",
-        "options": {
-          "minimap": {
-            "enabled": false
-          }
-        },
-        "bindable": true
+        "value": false,
+        "hidden": "properties.cache.value == 'none'"
       },
       {
         "id": "headers",
@@ -158,6 +161,17 @@
         "separator": true
       },
       {
+        "id": "basic",
+        "name": "HTTP Basic authentication",
+        "locale_name": {
+          "fr_FR": "HTTP Basic authentication"
+        },
+        "type": "Boolean",
+        "value": false,
+        "style": "switch",
+        "separator": true
+      },
+      {
         "id": "user",
         "name": "User Name",
         "locale_name": {
@@ -165,7 +179,7 @@
         },
         "type": "String",
         "bindable": true,
-        "separator": true
+        "disabled": "!properties.basic.value"
       },
       {
         "id": "password",
@@ -174,10 +188,17 @@
           "fr_FR": "Mot de passe"
         },
         "type": "String",
-        "bindable": true
+        "bindable": true,
+        "disabled": "!properties.basic.value"
       },
       {
         "id": "keys",
+        "hidden": true
+      },
+      {
+        "id": "pagination",
+        "type": "Boolean",
+        "value": false,
         "hidden": true
       }
     ],
@@ -214,7 +235,8 @@
               "fr_FR": "Boucle sur toutes les pages"
             },
             "type": "Boolean",
-            "value": false
+            "value": false,
+            "hidden": "!properties.pagination.value"
           },
           {
             "id": "content",

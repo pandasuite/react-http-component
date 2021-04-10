@@ -4,7 +4,9 @@
   "homepage": "./",
   "private": true,
   "dependencies": {
+    "@craco/craco": "5.8.0",
     "@rehooks/online-status": "^1.1.2",
+    "@tailwindcss/forms": "^0.3.2",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -14,12 +16,12 @@
     "localforage": "^1.9.0",
     "localforage-driver-session-storage": "^1.0.4",
     "lodash": "^4.17.19",
-    "pandasuite-bridge": "^4.2.3",
-    "pandasuite-bridge-react": "^2.0.6",
+    "pandasuite-bridge": "^4.3.0",
+    "pandasuite-bridge-react": "^2.1.1",
     "prop-types": "^15.7.2",
-    "react": "^16.13.0",
+    "react": "17.0.2",
     "react-app-polyfill": "^1.0.6",
-    "react-dom": "^16.13.0",
+    "react-dom": "17.0.2",
     "react-icons": "^3.11.0",
     "react-intl": "^5.8.2",
     "react-json-view": "^1.19.1",
@@ -27,9 +29,9 @@
     "recoil": "^0.0.10"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build && cd build && zip -r -X '../pandasuite-component.zip' *",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build && cd build && zip -r -X '../pandasuite-component.zip' *",
+    "test": "craco test",
     "eject": "react-scripts eject",
     "release": "yarn build && release-it --no-npm.publish"
   },
@@ -52,13 +54,17 @@
     ]
   },
   "devDependencies": {
+    "@tailwindcss/postcss7-compat": "^2.1.0",
+    "autoprefixer": "^9",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.18.3",
     "eslint-plugin-react-hooks": "^1.7.0",
-    "release-it": "^13.0.1"
+    "postcss": "^7",
+    "release-it": "^13.0.1",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat"
   },
   "release-it": {
     "github": {
