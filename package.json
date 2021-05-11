@@ -15,7 +15,7 @@
     "json-pointer": "^0.6.1",
     "localforage": "^1.9.0",
     "localforage-driver-session-storage": "^1.0.4",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "pandasuite-bridge": "^4.3.0",
     "pandasuite-bridge-react": "^2.1.2",
     "prop-types": "^15.7.2",
