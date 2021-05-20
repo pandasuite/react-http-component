@@ -60,7 +60,7 @@
           "fr_FR": "Type de contenu"
         },
         "type": "Dropdown",
-        "value": "application/json",
+        "value": "text/plain",
         "items": [
           {
             "id": "text/plain",
